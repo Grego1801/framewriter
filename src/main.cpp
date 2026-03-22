@@ -16,10 +16,10 @@ void writeFrame(int f) {
 }
 
 class $modify(GJBaseGameLayer) {
-    // Match exact signature from 2.2081 bindings
     void processCommands(float dt, bool isHalfTick, bool isLastTick) {
         GJBaseGameLayer::processCommands(dt, isHalfTick, isLastTick);
-        if (g_playing) {
+        // Only count on last tick to avoid double counting
+        if (g_playing && isLastTick) {
             g_frame++;
             writeFrame(g_frame);
         }
