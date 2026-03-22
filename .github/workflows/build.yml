@@ -3,15 +3,19 @@ name: Build FrameWriter
 on: [push]
 
 jobs:
-  build:
+  build-android64:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: geode-sdk/build-geode-mod/combine@main
+
+      - name: Build mod
+        uses: geode-sdk/build-geode-mod@main
         id: build
         with:
-          targets: Android64
-      - uses: actions/upload-artifact@v4
+          target: Android64
+
+      - name: Upload
+        uses: actions/upload-artifact@v4
         with:
-          name: FrameWriter
+          name: FrameWriter-android64
           path: ${{ steps.build.outputs.build-output }}
