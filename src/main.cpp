@@ -1,6 +1,5 @@
 #include <Geode/Geode.hpp>
 #include <Geode/modify/PlayLayer.hpp>
-#include <Geode/modify/GJBaseGameLayer.hpp>
 #include <fstream>
 
 using namespace geode::prelude;
@@ -15,16 +14,6 @@ void writeFrame(int f) {
     if (file) { fprintf(file, "%d", f); fclose(file); }
 }
 
-class $modify(GJBaseGameLayer) {
-    void processCommands(float dt) {
-        GJBaseGameLayer::processCommands(dt);
-        if (g_playing) {
-            g_frame++;
-            writeFrame(g_frame);
-        }
-    }
-};
-
 class $modify(PlayLayer) {
     bool init(GJGameLevel* level, bool useReplay, bool dontCreateObjects) {
         g_frame = 0;
@@ -34,6 +23,14 @@ class $modify(PlayLayer) {
         g_playing = true;
         writeFrame(0);
         return true;
+    }
+
+    void update(float dt) {
+        PlayLayer::update(dt);
+        if (g_playing) {
+            g_frame++;
+            writeFrame(g_frame);
+        }
     }
 
     void resetLevel() {
