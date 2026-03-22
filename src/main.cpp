@@ -8,9 +8,11 @@ class $modify(PlayLayer) {
     void update(float dt) {
         PlayLayer::update(dt);
         
-        // Access m_time through the PlayLayer instance
-        auto pl = static_cast<PlayLayer*>(this);
-        int frame = (int)(pl->m_time * 240.0f);
+        // Try different field names for game time
+        // In newer GD versions it might be m_gameState.m_levelTime
+        // or accessed via getCurrentTime()
+        float time = this->m_gameState.m_levelTime;
+        int frame = (int)(time * 240.0f);
         
         if (frame % 4 == 0) {
             std::ofstream f("/sdcard/gd_frame.txt",
