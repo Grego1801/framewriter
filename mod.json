@@ -9,11 +9,10 @@
     "developer": "Grunwald",
     "description": "Writes current game frame to file.",
     "platforms": ["android64"],
-    "dependencies": [
-        {
-            "id": "eclipse.eclipse-menu",
+    "dependencies": {
+        "eclipse.eclipse-menu": {
             "version": ">=1.0.0",
             "importance": "required"
         }
-    ]
+    }
 }
