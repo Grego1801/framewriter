@@ -18,11 +18,14 @@ class $modify(GJBaseGameLayer) {
     void update(float dt) {
         GJBaseGameLayer::update(dt);
         if (g_playing) {
-            // m_time is in GJBaseGameLayer
-            double t = this->m_time;
-            if (t >= 0.0 && t < 600.0) {
-                int frame = (int)(t * 240.0);
-                writeFrame(frame);
+            auto pl = PlayLayer::get();
+            if (pl) {
+                // Cast to GJBaseGameLayer to access m_time
+                auto base = static_cast<GJBaseGameLayer*>(pl);
+                double t = base->m_time;
+                if (t >= 0.0 && t < 600.0) {
+                    writeFrame((int)(t * 240.0));
+                }
             }
         }
     }
