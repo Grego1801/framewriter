@@ -5,7 +5,7 @@
 
 using namespace geode::prelude;
 
-#define FRAME_FILE "/tmp/gd_frame"
+#define FRAME_FILE "/sdcard/Android/media/com.geode.launcher/game/gd_frame.txt"
 static bool g_playing = false;
 
 void writeFrame(int f) {
