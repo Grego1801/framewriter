@@ -13,6 +13,7 @@ jobs:
         id: build
         with:
           target: Android64
+          sdk: '2.0.0'
 
       - name: Upload
         uses: actions/upload-artifact@v4
