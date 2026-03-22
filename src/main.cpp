@@ -4,6 +4,7 @@
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <unistd.h>
 
 using namespace geode::prelude;
 
@@ -19,7 +20,7 @@ void initShm() {
     g_frame_ptr = (int*)mmap(NULL, sizeof(int),
         PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
     close(fd);
-    *g_frame_ptr = -1;
+    if (g_frame_ptr) *g_frame_ptr = -1;
 }
 
 void writeFrame(int f) {
