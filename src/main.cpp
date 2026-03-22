@@ -10,15 +10,17 @@ using namespace geode::prelude;
 static int g_frame = 0;
 static bool g_playing = false;
 
+void writeFrame(int f) {
+    std::ofstream file(FRAME_FILE, std::ios::trunc);
+    if (file.is_open()) file << f;
+}
+
 class $modify(GJBaseGameLayer) {
     void update(float dt) {
         GJBaseGameLayer::update(dt);
         if (g_playing) {
             g_frame++;
-            if (g_frame % 4 == 0) {
-                std::ofstream f(FRAME_FILE, std::ios::trunc);
-                if (f.is_open()) f << g_frame;
-            }
+            if (g_frame % 4 == 0) writeFrame(g_frame);
         }
     }
 };
@@ -30,16 +32,20 @@ class $modify(PlayLayer) {
         if (!PlayLayer::init(level, useReplay, dontCreateObjects))
             return false;
         g_playing = true;
-        std::ofstream f(FRAME_FILE, std::ios::trunc);
-        if (f.is_open()) f << 0;
+        writeFrame(0);
         return true;
+    }
+
+    void resetLevel() {
+        g_frame = 0;
+        PlayLayer::resetLevel();
+        writeFrame(0);
     }
 
     void onQuit() {
         g_playing = false;
         g_frame = 0;
-        std::ofstream f(FRAME_FILE, std::ios::trunc);
-        if (f.is_open()) f << -1;
+        writeFrame(-1);
         PlayLayer::onQuit();
     }
 };
