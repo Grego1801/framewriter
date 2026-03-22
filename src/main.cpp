@@ -18,11 +18,14 @@ class $modify(GJBaseGameLayer) {
     void update(float dt) {
         GJBaseGameLayer::update(dt);
         if (g_playing) {
-            // Use PlayLayer::m_currentTime (double, in seconds)
             auto pl = PlayLayer::get();
             if (pl) {
-                int frame = (int)(pl->m_currentTime * 240.0);
-                writeFrame(frame);
+                double t = pl->m_currentTime;
+                // Sanity check - level time should be 0-600 seconds
+                if (t >= 0.0 && t < 600.0) {
+                    int frame = (int)(t * 240.0);
+                    writeFrame(frame);
+                }
             }
         }
     }
