@@ -7,6 +7,13 @@
     "name": "FrameWriter",
     "version": "1.0.0",
     "developer": "Grunwald",
-    "description": "Writes current game frame to file. Nothing else.",
-    "platforms": ["android64"]
+    "description": "Writes current game frame to file.",
+    "platforms": ["android64"],
+    "dependencies": [
+        {
+            "id": "eclipse.eclipse-menu",
+            "version": ">=1.0.0",
+            "importance": "required"
+        }
+    ]
 }

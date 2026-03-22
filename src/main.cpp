@@ -2,11 +2,11 @@
 #include <Geode/modify/PlayLayer.hpp>
 #include <Geode/modify/GJBaseGameLayer.hpp>
 #include <fstream>
+#include <eclipse.hpp>
 
 using namespace geode::prelude;
 
 #define FRAME_FILE "/sdcard/Android/media/com.geode.launcher/game/gd_frame.txt"
-
 static bool g_playing = false;
 
 void writeFrame(int f) {
@@ -18,14 +18,9 @@ class $modify(GJBaseGameLayer) {
     void update(float dt) {
         GJBaseGameLayer::update(dt);
         if (g_playing) {
-            auto pl = PlayLayer::get();
-            if (pl) {
-                // Cast to GJBaseGameLayer to access m_time
-                auto base = static_cast<GJBaseGameLayer*>(pl);
-                double t = base->m_time;
-                if (t >= 0.0 && t < 600.0) {
-                    writeFrame((int)(t * 240.0));
-                }
+            auto result = eclipse::label::getVariable<int64_t>("frameReal");
+            if (result) {
+                writeFrame((int)result.unwrap());
             }
         }
     }
