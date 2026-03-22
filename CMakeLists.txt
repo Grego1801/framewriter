@@ -11,17 +11,4 @@ endif()
 
 add_subdirectory($ENV{GEODE_SDK} ${CMAKE_CURRENT_BINARY_DIR}/geode)
 target_link_libraries(${PROJECT_NAME} geode-sdk)
-
-# Add Eclipse include path
-CPMAddPackage(
-    NAME eclipse-menu
-    GITHUB_REPOSITORY EclipseMenu/EclipseMenu
-    GIT_TAG main
-    DOWNLOAD_ONLY YES
-)
-if(eclipse-menu_ADDED)
-    target_include_directories(${PROJECT_NAME} PRIVATE 
-        ${eclipse-menu_SOURCE_DIR}/include)
-endif()
-
 setup_geode_mod(${PROJECT_NAME})
