@@ -13,7 +13,7 @@ jobs:
         id: build
         with:
           target: Android64
-          sdk: 'v3.7.1'
+          sdk: 'nightly'
 
       - name: Upload
         uses: actions/upload-artifact@v4
