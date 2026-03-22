@@ -7,7 +7,6 @@ using namespace geode::prelude;
 
 #define FRAME_FILE "/sdcard/Android/media/com.geode.launcher/game/gd_frame.txt"
 
-static int g_frame = 0;
 static bool g_playing = false;
 
 void writeFrame(int f) {
@@ -19,15 +18,18 @@ class $modify(GJBaseGameLayer) {
     void update(float dt) {
         GJBaseGameLayer::update(dt);
         if (g_playing) {
-            g_frame++;
-            if (g_frame % 4 == 0) writeFrame(g_frame);
+            // Use PlayLayer::m_currentTime (double, in seconds)
+            auto pl = PlayLayer::get();
+            if (pl) {
+                int frame = (int)(pl->m_currentTime * 240.0);
+                writeFrame(frame);
+            }
         }
     }
 };
 
 class $modify(PlayLayer) {
     bool init(GJGameLevel* level, bool useReplay, bool dontCreateObjects) {
-        g_frame = 0;
         g_playing = false;
         if (!PlayLayer::init(level, useReplay, dontCreateObjects))
             return false;
@@ -37,14 +39,12 @@ class $modify(PlayLayer) {
     }
 
     void resetLevel() {
-        g_frame = 0;
         PlayLayer::resetLevel();
         writeFrame(0);
     }
 
     void onQuit() {
         g_playing = false;
-        g_frame = 0;
         writeFrame(-1);
         PlayLayer::onQuit();
     }
