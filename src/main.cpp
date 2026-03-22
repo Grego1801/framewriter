@@ -8,10 +8,10 @@ class $modify(PlayLayer) {
     void update(float dt) {
         PlayLayer::update(dt);
         
-        // Write current frame number to file
-        int frame = (int)(m_time * 240.0f);
+        // Access m_time through the PlayLayer instance
+        auto pl = static_cast<PlayLayer*>(this);
+        int frame = (int)(pl->m_time * 240.0f);
         
-        // Only write every 4 frames to reduce I/O
         if (frame % 4 == 0) {
             std::ofstream f("/sdcard/gd_frame.txt",
                            std::ios::trunc);
@@ -22,7 +22,6 @@ class $modify(PlayLayer) {
     }
     
     void onQuit() {
-        // Write -1 to signal level ended
         std::ofstream f("/sdcard/gd_frame.txt",
                        std::ios::trunc);
         if (f.is_open()) f << -1;
