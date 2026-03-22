@@ -1,0 +1,15 @@
+{
+    "geode": "3.0.0",
+    "gd": {
+        "android": "2.2074",
+        "win": "*",
+        "mac": "*",
+        "ios": "*"
+    },
+    "id": "blackbox.framewriter",
+    "name": "FrameWriter",
+    "version": "1.0.0",
+    "developer": "Grunwald",
+    "description": "Writes current game frame to file. Nothing else.",
+    "platforms": ["android64"]
+}
