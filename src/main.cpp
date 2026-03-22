@@ -26,7 +26,7 @@ class $modify(GJBaseGameLayer) {
         // Use m_gameState.m_unk1 or find correct field
         // For now derive from attempt time
         double t = pl->m_attemptTime;
-        int frame = (int)round(t * 240.0);
+        int frame = (int)round(t * 480.0);
         
         if (frame != g_lastFrame) {
             g_lastFrame = frame;
