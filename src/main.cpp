@@ -1,57 +1,49 @@
 #include <Geode/Geode.hpp>
 #include <Geode/modify/PlayLayer.hpp>
-#include <Geode/modify/GJBaseGameLayer.hpp>
+#include <sys/mman.h>
 #include <fcntl.h>
-#include <unistd.h>
 
 using namespace geode::prelude;
 
-#define FRAME_FILE "/data/data/com.geode.launcher/files/gd_frame.bin"
+struct SharedData {
+    int frame;
+    bool isDead;
+};
 
-static bool g_playing = false;
-static int g_frame = 0;
+static SharedData* g_shared = nullptr;
 static int g_fd = -1;
 
-void writeFrame(int f) {
-    if (g_fd < 0)
-        g_fd = open(FRAME_FILE, O_WRONLY | O_CREAT | O_TRUNC, 0666);
-    if (g_fd >= 0)
-        pwrite(g_fd, &f, sizeof(int), 0);
-}
+class $modify(PlayLayer) {
+    bool init(GJGameLevel* level, bool useReplay, bool dontCreateObjects) {
+        if (!PlayLayer::init(level, useReplay, dontCreateObjects)) return false;
 
-class $modify(GJBaseGameLayer) {
-    void processCommands(float dt, bool isHalfTick, bool isLastTick) {
-        GJBaseGameLayer::processCommands(dt, isHalfTick, isLastTick);
-        if (!g_playing) return;
-        // Only count full physics steps, not half ticks
-        if (!isHalfTick && isLastTick) {
-            g_frame++;
-            writeFrame(g_frame);
+        if (!g_shared) {
+            // Use /data/local/tmp for cross-process access on Android
+            g_fd = open("/data/local/tmp/gd_bot.bin", O_RDWR | O_CREAT, 0666);
+            ftruncate(g_fd, sizeof(SharedData));
+            g_shared = (SharedData*)mmap(NULL, sizeof(SharedData), PROT_READ | PROT_WRITE, MAP_SHARED, g_fd, 0);
+            chmod("/data/local/tmp/gd_bot.bin", 0666); // Root access fix
+        }
+        
+        g_shared->frame = 0;
+        g_shared->isDead = false;
+        return true;
+    }
+
+    void postUpdate(float dt) {
+        PlayLayer::postUpdate(dt);
+        if (g_shared && !m_isPaused) {
+            g_shared->frame++;
+            g_shared->isDead = m_player1->m_isDead;
+        }
+    }
+
+    void resetLevel() {
+        PlayLayer::resetLevel();
+        if (g_shared) {
+            g_shared->frame = 0;
+            g_shared->isDead = false;
         }
     }
 };
 
-class $modify(PlayLayer) {
-    bool init(GJGameLevel* level, bool useReplay, bool dontCreateObjects) {
-        g_frame = 0;
-        g_playing = false;
-        if (!PlayLayer::init(level, useReplay, dontCreateObjects))
-            return false;
-        g_playing = true;
-        writeFrame(0);
-        return true;
-    }
-
-    void resetLevel() {
-        g_frame = 0;
-        PlayLayer::resetLevel();
-        writeFrame(0);
-    }
-
-    void onQuit() {
-        g_playing = false;
-        g_frame = 0;
-        writeFrame(-1);
-        PlayLayer::onQuit();
-    }
-};
