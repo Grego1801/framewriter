@@ -35,7 +35,7 @@ class $modify(PlayLayer) {
     bool init(GJGameLevel* level, bool useReplay, bool dontCreateObjects) {
         g_playing = false;
         g_frame = 0;
-        if (!g_fd) openFile();
+        if (g_fd < 0) openFile();
         if (!PlayLayer::init(level, useReplay, dontCreateObjects))
             return false;
         g_playing = true;
