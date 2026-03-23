@@ -1,8 +1,8 @@
 #include <Geode/Geode.hpp>
 #include <Geode/modify/PlayLayer.hpp>
 #include <fcntl.h>
-#include <stdio.h>
-#include <string.h>
+#include <fstream>
+#include <string>
 
 using namespace geode::prelude;
 
@@ -12,14 +12,21 @@ using namespace geode::prelude;
 static bool g_started = false;
 static bool g_wroteDeathThisAttempt = false;
 
+// Renamed to avoid ambiguity with math.h and geode::log
 void writeState(int status, float percent) {
-    FILE* f = fopen(STATE_FILE, "w");
-    if (f) { fprintf(f, "%d:%.2f", status, percent); fflush(f); fclose(f); }
+    std::ofstream f(STATE_FILE);
+    if (f.is_open()) {
+        f << status << ":" << std::fixed << std::setprecision(2) << percent;
+        f.close();
+    }
 }
 
-void log(const char* msg) {
-    FILE* f = fopen(LOG_FILE, "a");
-    if (f) { fprintf(f, "%s\n", msg); fclose(f); }
+void aiLog(const std::string& msg) {
+    std::ofstream f(LOG_FILE, std::ios::app);
+    if (f.is_open()) {
+        f << msg << "\n";
+        f.close();
+    }
 }
 
 class $modify(PlayLayer) {
@@ -28,7 +35,7 @@ class $modify(PlayLayer) {
         g_wroteDeathThisAttempt = false;
         if (!PlayLayer::init(level, useReplay, dontCreateObjects)) return false;
         writeState(0, 0.0f);
-        log("init");
+        aiLog("init");
         return true;
     }
 
@@ -37,7 +44,7 @@ class $modify(PlayLayer) {
         g_started = true;
         g_wroteDeathThisAttempt = false;
         writeState(0, 0.0f);
-        log("startGame -> g_wrote=false");
+        aiLog("startGame -> g_wrote=false");
     }
 
     void resetLevel() {
@@ -45,21 +52,25 @@ class $modify(PlayLayer) {
         g_wroteDeathThisAttempt = false;
         g_started = false;
         writeState(0, 0.0f);
-        log("resetLevel -> g_wrote=false");
+        aiLog("resetLevel -> g_wrote=false");
     }
 
     void destroyPlayer(PlayerObject* p, GameObject* o) {
         PlayLayer::destroyPlayer(p, o);
-        char buf[128];
-        snprintf(buf, sizeof(buf), "destroyPlayer started=%d wrote=%d isP1=%d isDead=%d",
-            g_started, g_wroteDeathThisAttempt,
-            (int)(p == m_player1),
-            (int)(m_player1 && m_player1->m_isDead));
-        log(buf);
+        
+        // Safety check for null pointers
+        if (!p || !m_player1) return;
+
+        std::string debugMsg = "destroyPlayer started=" + std::to_string(g_started) + 
+                               " wrote=" + std::to_string(g_wroteDeathThisAttempt) + 
+                               " isP1=" + std::to_string(p == m_player1) + 
+                               " isDead=" + std::to_string(m_player1->m_isDead);
+        aiLog(debugMsg);
+
         if (g_started && !g_wroteDeathThisAttempt && p == m_player1 && m_player1->m_isDead) {
             g_wroteDeathThisAttempt = true;
             writeState(1, this->getCurrentPercent());
-            log("DEATH WRITTEN");
+            aiLog("DEATH WRITTEN");
         }
     }
 
@@ -67,7 +78,7 @@ class $modify(PlayLayer) {
         g_started = false;
         g_wroteDeathThisAttempt = false;
         writeState(2, 0.0f);
-        log("onQuit");
+        aiLog("onQuit");
         PlayLayer::onQuit();
     }
 };
