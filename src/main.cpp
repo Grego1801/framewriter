@@ -38,9 +38,9 @@ class $modify(PlayLayer) {
     }
 
     void resetLevel() {
+        PlayLayer::resetLevel();
         g_wroteDeathThisAttempt = false;
         g_started = false;
-        PlayLayer::resetLevel();
         writeState(0, 0.0f);
     }
 
