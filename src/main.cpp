@@ -28,49 +28,39 @@ void aiLog(const std::string& msg) {
         f.close();
     }
 }
-
 class $modify(PlayLayer) {
     bool init(GJGameLevel* level, bool useReplay, bool dontCreateObjects) {
-        g_started = false;
-        g_wroteDeathThisAttempt = false;
         if (!PlayLayer::init(level, useReplay, dontCreateObjects)) return false;
-        writeState(0, 0.0f);
-        aiLog("init");
-        return true;
-    }
-
-    void startGame() {
-        PlayLayer::startGame();
-        g_started = true;
+        
+        g_started = true; // We are in the level
         g_wroteDeathThisAttempt = false;
         writeState(0, 0.0f);
-        aiLog("startGame -> g_wrote=false");
+        aiLog("init -> ready to play");
+        return true;
     }
 
     void resetLevel() {
         PlayLayer::resetLevel();
-        g_wroteDeathThisAttempt = false;
-        g_started = false;
+        
+        g_started = true; // Still in the level, physics are resetting
+        g_wroteDeathThisAttempt = false; // Reset the death toggle
         writeState(0, 0.0f);
-        aiLog("resetLevel -> g_wrote=false");
+        aiLog("resetLevel -> state: ALIVE");
     }
 
     void destroyPlayer(PlayerObject* p, GameObject* o) {
         PlayLayer::destroyPlayer(p, o);
         
-        // Safety check for null pointers
         if (!p || !m_player1) return;
 
-        std::string debugMsg = "destroyPlayer started=" + std::to_string(g_started) + 
-                               " wrote=" + std::to_string(g_wroteDeathThisAttempt) + 
-                               " isP1=" + std::to_string(p == m_player1) + 
-                               " isDead=" + std::to_string(m_player1->m_isDead);
-        aiLog(debugMsg);
-
-        if (g_started && !g_wroteDeathThisAttempt && p == m_player1 && m_player1->m_isDead) {
+        // Condition 1: Is it the main player?
+        // Condition 2: Have we NOT written death yet for this attempt?
+        // Condition 3: Is the player actually flagged as dead?
+        if (p == m_player1 && !g_wroteDeathThisAttempt && m_player1->m_isDead) {
             g_wroteDeathThisAttempt = true;
-            writeState(1, this->getCurrentPercent());
-            aiLog("DEATH WRITTEN");
+            float pct = this->getCurrentPercent();
+            writeState(1, pct);
+            aiLog("DEATH WRITTEN: " + std::to_string(pct) + "%");
         }
     }
 
@@ -78,7 +68,8 @@ class $modify(PlayLayer) {
         g_started = false;
         g_wroteDeathThisAttempt = false;
         writeState(2, 0.0f);
-        aiLog("onQuit");
+        aiLog("onQuit -> state: MENU");
         PlayLayer::onQuit();
     }
 };
+
