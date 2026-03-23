@@ -1,8 +1,6 @@
 #include <Geode/Geode.hpp>
 #include <Geode/modify/PlayLayer.hpp>
-#include <Geode/modify/GJBaseGameLayer.hpp>
 #include <fcntl.h>
-#include <unistd.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -21,20 +19,6 @@ void writeState(int status, float percent) {
         fclose(f);
     }
 }
-
-class $modify(GJBaseGameLayer) {
-    // playerTookDamage fires when player actually takes damage
-    // More reliable than destroyPlayer
-    void playerTookDamage(PlayerObject* player) {
-        GJBaseGameLayer::playerTookDamage(player);
-        if (g_started && !g_dead && player == m_player1) {
-            g_dead = true;
-            auto pl = PlayLayer::get();
-            float pct = pl ? pl->getCurrentPercent() : 0.0f;
-            writeState(1, pct);
-        }
-    }
-};
 
 class $modify(PlayLayer) {
     bool init(GJGameLevel* level, bool useReplay, bool dontCreateObjects) {
@@ -58,6 +42,16 @@ class $modify(PlayLayer) {
         g_started = false;
         PlayLayer::resetLevel();
         writeState(0, 0.0f);
+    }
+
+    void destroyPlayer(PlayerObject* p, GameObject* o) {
+        PlayLayer::destroyPlayer(p, o);
+        // m_isDead is set by GD after destroyPlayer
+        // Check if this is p1 dying for the first time this attempt
+        if (g_started && !g_dead && p == m_player1) {
+            g_dead = true;
+            writeState(1, this->getCurrentPercent());
+        }
     }
 
     void onQuit() {
