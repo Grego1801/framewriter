@@ -2,6 +2,8 @@
 #include <Geode/modify/PlayLayer.hpp>
 #include <sys/mman.h>
 #include <fcntl.h>
+#include <unistd.h>
+#include <sys/stat.h>
 
 using namespace geode::prelude;
 
