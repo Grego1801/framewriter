@@ -6,36 +6,35 @@
 
 using namespace geode::prelude;
 
-#define FRAME_FILE "/sdcard/Android/media/com.geode.launcher/game/gd_frame.bin"
+#define FRAME_FILE "/data/data/com.geode.launcher/files/gd_frame.bin"
 
 static bool g_playing = false;
-static int g_fd = -1;
 static int g_frame = 0;
-
-void openFile() {
-    g_fd = open(FRAME_FILE, O_WRONLY | O_CREAT | O_TRUNC, 0666);
-}
+static int g_fd = -1;
 
 void writeFrame(int f) {
-    if (g_fd >= 0) {
+    if (g_fd < 0)
+        g_fd = open(FRAME_FILE, O_WRONLY | O_CREAT | O_TRUNC, 0666);
+    if (g_fd >= 0)
         pwrite(g_fd, &f, sizeof(int), 0);
-    }
 }
 
 class $modify(GJBaseGameLayer) {
     void processCommands(float dt, bool isHalfTick, bool isLastTick) {
         GJBaseGameLayer::processCommands(dt, isHalfTick, isLastTick);
-        if (!g_playing || isHalfTick) return;
-        g_frame++;
-        writeFrame(g_frame);
+        if (!g_playing) return;
+        // Only count full physics steps, not half ticks
+        if (!isHalfTick && isLastTick) {
+            g_frame++;
+            writeFrame(g_frame);
+        }
     }
 };
 
 class $modify(PlayLayer) {
     bool init(GJGameLevel* level, bool useReplay, bool dontCreateObjects) {
-        g_playing = false;
         g_frame = 0;
-        if (g_fd < 0) openFile();
+        g_playing = false;
         if (!PlayLayer::init(level, useReplay, dontCreateObjects))
             return false;
         g_playing = true;
