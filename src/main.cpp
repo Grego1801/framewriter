@@ -5,7 +5,7 @@
 
 using namespace geode::prelude;
 
-#define STATE_FILE "/data/local/tmp/gd_state.txt"
+#define STATE_FILE "/sdcard/Android/media/com.geode.launcher/game/gd_state.txt"
 
 void writeState(const char* state) {
     int fd = open(STATE_FILE, O_WRONLY | O_CREAT | O_TRUNC, 0666);
@@ -19,22 +19,22 @@ class $modify(PlayLayer) {
     bool init(GJGameLevel* level, bool useReplay, bool dontCreateObjects) {
         if (!PlayLayer::init(level, useReplay, dontCreateObjects))
             return false;
-        writeState("0"); // alive
+        writeState("0");
         return true;
     }
 
     void resetLevel() {
         PlayLayer::resetLevel();
-        writeState("0"); // alive after reset
+        writeState("0");
     }
 
     void destroyPlayer(PlayerObject* p, GameObject* o) {
         PlayLayer::destroyPlayer(p, o);
-        writeState("1"); // dead
+        writeState("1");
     }
 
     void onQuit() {
-        writeState("2"); // quit
+        writeState("2");
         PlayLayer::onQuit();
     }
 };
